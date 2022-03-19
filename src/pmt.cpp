@@ -6,17 +6,39 @@
 #include <fstream>
 
 using namespace std;
-  
-bool all_digits (string str){
-    for (int i = 0; i < str.length(); i++)
-    {
-        if(!isdigit(str[i])){
-            return false;
+
+vector<int> bruteforce(string pattern, string text){
+    vector<int> occurences = {};
+    bool aux;
+    for (int i = 0; i < (text.length() - pattern.length())+1; i++){
+        aux = false;
+        for (int j = 0; j < pattern.length(); j++){
+            if(pattern[j] != text[i+j]){
+                aux = true;
+                break;
+            }
         }
+        if(aux){
+            continue;
+        }
+        occurences.push_back(i);
     }
-    return true;
+    return occurences;
 }
 
+void print_ocurrences(string str, vector<int> occurences){
+    for (int i = 0; i < str.length(); i++){
+        if(std::find(occurences.begin(), occurences.end(), i) != occurences.end()) {
+            printf("\033[0;31m");
+            cout << str[i];
+            printf("\033[0m");
+        } else {
+            cout << str[i];
+        }
+    }
+    cout << endl;
+}
+  
 void usage(int status){
   if (status != 0){
       printf("err msg\n");
@@ -27,11 +49,13 @@ void usage(int status){
   exit (status);
 }
 
-int main(int argc, char **argv){    
-    int c; 
+int main(int argc, char **argv){  
+    string pattern;
+    int opt; 
     int edit_num;
     int alg_index = -1;
     bool count_flag = false;
+    bool pattern_file_flag = false;
     fstream my_file;
     vector<string> algorithms = {"alg1", "alg2", "alg3", "alg4"};
 
@@ -46,8 +70,9 @@ int main(int argc, char **argv){
 
     int option_index = 0;
 
-    while ((c = getopt_long (argc, argv, "a::ce:p:h", long_options, &option_index)) != -1) {  
-      switch (c){
+    //iterate trhoug option arguments with getopt
+    while ((opt = getopt_long (argc, argv, "a::ce:p:h", long_options, &option_index)) != -1) {  
+      switch (opt){
         case 'a':
             if (optarg == NULL && optind < argc && argv[optind][0] != '-') {
                 optarg = argv[optind++];
@@ -71,6 +96,7 @@ int main(int argc, char **argv){
             }
             break;
         case 'p':
+        pattern_file_flag = true;
 	        my_file.open(optarg, ios::in);
             if (!my_file) {
 		        cout << "No such file";
@@ -88,6 +114,28 @@ int main(int argc, char **argv){
           break;
         default :
             exit(1);
+        }
+    }
+
+    //save pattern if not using pattern file
+    if(!pattern_file_flag){
+        pattern = argv[optind];
+        optind++;
+    }
+
+    vector<string> texts = {};
+    //redundant
+    for (int i = optind; i < argc; i++){
+        //texts.push_back(argv[i]);
+        ifstream file;
+        file.open(argv[i]);
+        if ( file.is_open() ) {     
+            while ( file.good() ) {
+                string mystring;
+                file >> mystring;
+                vector<int> occurences = bruteforce(pattern,mystring);
+                print_ocurrences(mystring, occurences);
+            }
         }
     }
     return 0;
