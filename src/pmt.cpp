@@ -5,7 +5,8 @@
 #include <algorithm>
 #include <fstream>
 
-#define PATHMAXLEN 1024
+#include "my_algorithms.h"
+
 #define RED "\033[1;31m"
 #define WHITE "\033[0m"
 using namespace std;
@@ -22,13 +23,16 @@ vector<pair<int,int>> bruteforce(const vector<string>& patterns, const string& t
             }
         }
     }
-    sort(begin(occurences), end(occurences));
-    occurences.erase(unique(begin(occurences),end(occurences)), end(occurences));
     return occurences;
 }
 
-void print_ocurrences(const string& text_line, int line_index, const vector<pair<int,int>>& occurences){
+void print_ocurrences(const string& text_line, int line_index, vector<pair<int,int>>& occurences){
     if(occurences.empty()) return;
+    sort(begin(occurences), end(occurences), [](const auto& a, const auto& b){
+        if(a.first != b.first) return a.first < b.first;
+        return a.second > b.second;
+    });
+
     int text_len = (int)text_line.length(), occur_len = (int)occurences.size();
     int red_index = 0;
     cout << "Line " << line_index << ": ";
@@ -68,14 +72,23 @@ void usage(Interruption_Types status){
     exit (status);
 }
 
+
+vector<pair<int,int>> get_occurrences(const vector<string>& patterns, const string& text, const vector<string>& algorithms, int alg_index){
+    if(alg_index == 0) return bruteforce(patterns, text);
+    if(algorithms[alg_index] == "kmp"){
+        static auto borders = get_borders(patterns);
+        return match_patterns(patterns, text, borders);
+    }
+    return bruteforce(patterns, text);
+}
+
 int main(int argc, char **argv){
     int opt; 
     int edit_num;
-    int alg_index = -1;
+    int alg_index = 0;
     bool count_flag = false;
-    char patterns_directory[PATHMAXLEN] = "../";
     fstream patterns_file;
-    vector<string> algorithms = {"alg1", "alg2", "alg3", "alg4"};
+    vector<string> algorithms = {"bruteforce", "kmp", "alg3", "alg4"};
     
     static struct option long_options[] = {
             {"edit", required_argument, 0, 'e'},
@@ -96,6 +109,8 @@ int main(int argc, char **argv){
                 optarg = argv[optind++];
             }
             if (optarg) {
+                // convert input string to lowercase
+                for(size_t i = 0; i < strlen(optarg); ++i) optarg[i] = tolower(optarg[i]);
                 auto it = find(begin(algorithms), end(algorithms), optarg);
                 if(it == end(algorithms)) {
                     usage(MISSING_ARGUMENTS);
@@ -117,8 +132,7 @@ int main(int argc, char **argv){
 	        if (optarg == NULL && optind < argc && argv[optind][0] != '-') {
                 optarg = argv[optind++];
             }
-            strcat(patterns_directory, optarg);
-            patterns_file.open(patterns_directory);
+            patterns_file.open(optarg);
             if (!patterns_file) {
                 usage(NON_EXISTING_FILE);
             }
@@ -127,7 +141,7 @@ int main(int argc, char **argv){
             usage(HELP);
             break;
         case '?':
-            usage(UNKNOWN_ARGUMENT);
+            exit(UNKNOWN_ARGUMENT);
             break;
         case 0:
           /* LONG OPTIONS */
@@ -148,22 +162,22 @@ int main(int argc, char **argv){
         patterns.emplace_back(argv[optind]);
         ++optind;
     }
+    //make sure all patterns are different
+    sort(begin(patterns), end(patterns));
+    patterns.erase(unique(begin(patterns),end(patterns)), end(patterns));
 
     int number_of_matches = 0;
     for (int i = optind; i < argc; ++i){
-        char text_directory[PATHMAXLEN] = "../";
-        strcat(text_directory, argv[i]);
         ifstream text_file;
-        text_file.open(text_directory);
+        text_file.open(argv[i]);
         if(!text_file){
             usage(NON_EXISTING_FILE);
         }
-
         cout << "Matches on file " << argv[i] << ": \n";
         string text_line;
-        int line_index = 0;
+        int line_index = 1;
         while(getline(text_file, text_line)){
-            auto occurences = bruteforce(patterns, text_line);
+            auto occurences = get_occurrences(patterns, text_line, algorithms, alg_index);
             number_of_matches += (int)occurences.size();
             print_ocurrences(text_line, line_index++, occurences);
         }
