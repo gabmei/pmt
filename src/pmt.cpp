@@ -76,8 +76,8 @@ void usage(Interruption_Types status){
 vector<pair<int,int>> get_occurrences(const vector<string>& patterns, const string& text, const vector<string>& algorithms, int alg_index){
     if(alg_index == 0) return bruteforce(patterns, text);
     if(algorithms[alg_index] == "kmp"){
-        static auto borders = get_borders(patterns);
-        return match_patterns(patterns, text, borders);
+        static auto kmp = KMP(patterns);
+        return kmp.match_patterns(text);
     }
     return bruteforce(patterns, text);
 }
