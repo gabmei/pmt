@@ -1,10 +1,10 @@
 #include<string>
 #include<vector>
 #include "my_algorithms.h"
-KMP::KMP(const std::vector<std::string>& _patterns):patterns(_patterns){ get_borders(); }
-std::vector<std::vector<int>> KMP::get_borders(){
+KMP::KMP(const std::vector<std::string>& patterns):patterns(patterns) { get_borders(); }
+void KMP::get_borders(){
     for(const auto& pattern : patterns) borders.emplace_back(get_border(pattern));
-    return borders;
+    return;
 }
 
 std::vector<int> KMP::get_border(const std::string& pattern){

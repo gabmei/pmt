@@ -74,7 +74,13 @@ void usage(Interruption_Types status){
 
 
 vector<pair<int,int>> get_occurrences(const vector<string>& patterns, const string& text, const vector<string>& algorithms, int alg_index){
-    if(alg_index == 0) return bruteforce(patterns, text);
+    if(alg_index == -1){
+        return bruteforce(patterns, text);
+    }
+    if(algorithms[alg_index] == "shift_or"){
+        static auto shift_or = SHIFT_OR(patterns);
+        return shift_or.match_patterns(text);
+    }
     if(algorithms[alg_index] == "kmp"){
         static auto kmp = KMP(patterns);
         return kmp.match_patterns(text);
@@ -88,7 +94,7 @@ int main(int argc, char **argv){
     int alg_index = 0;
     bool count_flag = false;
     fstream patterns_file;
-    vector<string> algorithms = {"bruteforce", "kmp", "alg3", "alg4"};
+    vector<string> algorithms = {"kmp", "shift_or", "alg3", "alg4"};
     
     static struct option long_options[] = {
             {"edit", required_argument, 0, 'e'},
