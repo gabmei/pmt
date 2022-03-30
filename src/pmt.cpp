@@ -34,14 +34,16 @@ void print_ocurrences(const string& text_line, int line_index, vector<pair<int,i
     });
 
     int text_len = (int)text_line.length(), occur_len = (int)occurences.size();
-    int red_index = 0;
+    int red_index = -1;
     cout << "Line " << line_index << ": ";
     for (int i = 0, j = 0; i < text_len; ++i){
         //occurrences[i] = {start_position_of_pattern, pattern_length}
+        while(j < occur_len && occurences[j].first < i) ++j;
         if(j < occur_len && occurences[j].first == i){
+            if(i > red_index) cout << RED; // at the start of a pattern
             red_index = i + occurences[j].second;
             ++j;
-            cout << RED; // at the start of a pattern
+
         }
         if(i == red_index){ // at the end of a pattern
             cout << WHITE;
@@ -73,7 +75,7 @@ void usage(Interruption_Types status){
 }
 
 
-vector<pair<int,int>> get_occurrences(const vector<string>& patterns, const string& text, const vector<string>& algorithms, int alg_index){
+vector<pair<int,int>> get_occurrences(const vector<string>& patterns, const string& text, const vector<string>& algorithms, int alg_index, int edit_dist = 0){
     if(alg_index == -1){
         return bruteforce(patterns, text);
     }
@@ -85,16 +87,20 @@ vector<pair<int,int>> get_occurrences(const vector<string>& patterns, const stri
         static auto kmp = KMP(patterns);
         return kmp.match_patterns(text);
     }
+    if(algorithms[alg_index] == "sellers"){
+        static auto sellers = SELLERS(patterns, edit_dist);
+        return sellers.match_patterns(text);
+    }
     return bruteforce(patterns, text);
 }
 
 int main(int argc, char **argv){
     int opt; 
-    int edit_num;
+    int edit_num = 0;
     int alg_index = 0;
     bool count_flag = false;
     fstream patterns_file;
-    vector<string> algorithms = {"kmp", "shift_or", "alg3", "alg4"};
+    vector<string> algorithms = {"kmp", "shift_or", "sellers", "alg4"};
     
     static struct option long_options[] = {
             {"edit", required_argument, 0, 'e'},
@@ -172,6 +178,11 @@ int main(int argc, char **argv){
     sort(begin(patterns), end(patterns));
     patterns.erase(unique(begin(patterns),end(patterns)), end(patterns));
 
+    //if edit_num != 0 change default
+    if(alg_index < 2 && edit_num > 0){
+        alg_index = int(find(begin(algorithms), end(algorithms), "sellers") - begin(algorithms));
+    }
+
     int number_of_matches = 0;
     for (int i = optind; i < argc; ++i){
         ifstream text_file;
@@ -179,20 +190,21 @@ int main(int argc, char **argv){
         if(!text_file){
             usage(NON_EXISTING_FILE);
         }
-        cout << "Matches on file " << argv[i] << ": \n";
+        if(!count_flag) cout << "Matches on file " << argv[i] << ": \n";
         string text_line;
         int line_index = 1;
         while(getline(text_file, text_line)){
-            auto occurences = get_occurrences(patterns, text_line, algorithms, alg_index);
+            auto occurences = get_occurrences(patterns, text_line, algorithms, alg_index, edit_num);
             number_of_matches += (int)occurences.size();
-            print_ocurrences(text_line, line_index++, occurences);
+            if(!count_flag) print_ocurrences(text_line, line_index++, occurences);
         }
         text_file.close();
-        cout << '\n';
+        if(!count_flag) cout << '\n';
+        else {
+            cout << "Total number of matches on file " << argv[i] << ": " << number_of_matches << '\n';
+        }
     }
-    if(count_flag){
-        cout << "Total number of matches: " << number_of_matches << '\n';
-    }
+    
 
     return 0;
 }

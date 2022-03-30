@@ -38,3 +38,24 @@ class SHIFT_OR{
 };
 
 #endif // SHIFT_OR_H
+
+#ifndef SELLERS_H
+#define SELLERS_H
+
+class SELLERS{
+    public:
+        SELLERS(const std::vector<std::string>& patterns, int editDist);
+        std::vector<std::pair<int,int>> match_patterns(const std::string& text);
+    private:
+        static int phi(const char& a, const char& b) { return a != b ? 1 : 0; }
+        void update_col(const int& id, std::vector<std::pair<int,int>>& col, const char& letter);
+        void match_pattern(const int id, const std::string& text, std::vector<std::pair<int,int>>& occurrences);
+
+        std::vector<std::string> patterns;
+        int edit_dist;
+        
+        
+        
+};
+
+#endif // SELLERS_H
