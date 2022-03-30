@@ -21,6 +21,10 @@ std::vector<int> KMP::get_border(const std::string& pattern){
 void KMP::match_pattern(const int id, const std::string& text, std::vector<std::pair<int,int>>& occurrences){
     const auto& pattern = patterns[id];
     const auto& border = borders[id];
+    if(pattern.empty()){
+        occurrences.emplace_back(0, 0);
+        return;
+    }
     int text_len = (int)text.size();
     int pattern_len = (int)pattern.size();
     for(int i = 0, j = -1; i < text_len; ++i){
