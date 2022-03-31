@@ -4,8 +4,8 @@ CFLAGS = -c -std=c++17 -O2 -Wall
 
 all: pmt
 
-pmt: pmt.o kmp.o shift_or.o sellers.o
-	$(CC) pmt.o kmp.o shift_or.o sellers.o -o pmt
+pmt: pmt.o kmp.o shift_or.o sellers.o ukkonen.o
+	$(CC) pmt.o kmp.o shift_or.o sellers.o ukkonen.o -o pmt
 
 pmt.o: ./src/pmt.cpp
 	$(CC) $(CFLAGS) ./src/pmt.cpp
@@ -18,6 +18,9 @@ shift_or.o: ./src/shift_or.cpp
 
 sellers.o: ./src/sellers.cpp
 	$(CC) $(CFLAGS) ./src/sellers.cpp
+
+ukkonen.o: ./src/ukkonen.cpp
+	$(CC) $(CFLAGS) ./src/ukkonen.cpp
 
 clean:
 	rm *.o pmt

@@ -91,6 +91,10 @@ vector<pair<int,int>> get_occurrences(const vector<string>& patterns, const stri
         static auto sellers = SELLERS(patterns, edit_dist);
         return sellers.match_patterns(text);
     }
+    if(algorithms[alg_index] == "ukkonen"){
+        static auto sellers = SELLERS(patterns, edit_dist);
+        return sellers.match_patterns(text);
+    }
     return bruteforce(patterns, text);
 }
 
@@ -100,7 +104,7 @@ int main(int argc, char **argv){
     int alg_index = 0;
     bool count_flag = false;
     fstream patterns_file;
-    vector<string> algorithms = {"kmp", "shift_or", "sellers", "alg4"};
+    vector<string> algorithms = {"kmp", "shift_or", "sellers", "ukkonen"};
     
     static struct option long_options[] = {
             {"edit", required_argument, 0, 'e'},
