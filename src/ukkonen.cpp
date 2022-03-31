@@ -50,7 +50,7 @@ std::pair<std::vector<std::vector<int>>, std::unordered_map<int, int>> UKKONEN::
     int index_seq = 1;
     std::vector<std::vector<int>> delta;
     std::unordered_map<int, int> final_states;
-    /*
+    
     if(init_col[pattern_len].first <= edit_dist){
         final_states[0] = 0;
     }
@@ -77,7 +77,7 @@ std::pair<std::vector<std::vector<int>>, std::unordered_map<int, int>> UKKONEN::
             delta[cur_col_index].push_back(next_index);
         }
     }
-    */
+    
     return {delta, final_states};
 }
 
@@ -85,24 +85,21 @@ std::pair<std::vector<std::vector<int>>, std::unordered_map<int, int>> UKKONEN::
 void UKKONEN::match_pattern(const int id, const std::string& text, std::vector<std::pair<int,int>>& occurrences){
     int text_len = (int)text.size();
 
-    auto fsm = build_fsm(id);
+    auto static fsm = build_fsm(id);
     const auto& delta = fsm.first;  
-    std::unordered_map<int, int> final_states = fsm.second;
+    auto& final_states = fsm.second;
     
     int cur_index = 0;
-    // error here
-    if(final_states[cur_index]){
-        occurrences.emplace_back(0);
+    if(final_states.count(cur_index)){
+        occurrences.emplace_back(0, 0);
     }
-    /*
     for(int i = 0; i < text_len; ++i){
-        cur_index = fsm.first[cur_index][char_id(text[i])];
+        cur_index = delta[cur_index][char_id(text[i])];
         if(fsm.second.count(cur_index)){
             auto len = fsm.second[cur_index];
             occurrences.emplace_back(i - len + 1, len);
         }
     }
-    */
 }
 
 std::vector<std::pair<int,int>> UKKONEN::match_patterns(const std::string& text){
