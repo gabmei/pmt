@@ -92,8 +92,8 @@ vector<pair<int,int>> get_occurrences(const vector<string>& patterns, const stri
         return sellers.match_patterns(text);
     }
     if(algorithms[alg_index] == "ukkonen"){
-        static auto sellers = SELLERS(patterns, edit_dist);
-        return sellers.match_patterns(text);
+        static auto ukkonen = UKKONEN(patterns, edit_dist);
+        return ukkonen.match_patterns(text);
     }
     return bruteforce(patterns, text);
 }
