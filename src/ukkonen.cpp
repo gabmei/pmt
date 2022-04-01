@@ -36,8 +36,8 @@ std::pair<std::vector<std::vector<int>>, std::unordered_map<int, int>> UKKONEN::
     for(int i = 0; i < pattern_len + 1; ++i) init_col[i].first = i;
     std::queue<std::pair<std::vector<std::pair<int,int>>, int>> col_queue;
     col_queue.push({init_col, 0});
-    /*
-    ;auto hash = [](const std::vector<std::pair<int,int>>& v){
+    
+    auto hash = [](const std::vector<std::pair<int,int>>& v){
         int hash = (int)v.size();
         for(auto& i : v){
             hash ^= (i.first^i.second) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
@@ -45,8 +45,7 @@ std::pair<std::vector<std::vector<int>>, std::unordered_map<int, int>> UKKONEN::
         return hash;
     };
     std::unordered_map<std::vector<std::pair<int,int>>, int, decltype(hash)> all_states(10, hash);
-    */
-    std::map<std::vector<std::pair<int,int>>, int> all_states;
+    //std::map<std::vector<std::pair<int,int>>, int> all_states;
     int index_seq = 1;
     std::vector<std::vector<int>> delta;
     std::unordered_map<int, int> final_states;
