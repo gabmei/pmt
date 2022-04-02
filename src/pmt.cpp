@@ -63,7 +63,18 @@ enum Interruption_Types {
 };
 
 string Interruption_Messages[] = {
-    "Help message",
+    "Usage: ./bin/pmt [options] pattern textfile [textfile...]\n"
+    "Search for patten in each textfile\n"
+    "Example: ./bin/pmt -a KMP \"hello world\" hello.txt\n"
+    "Multiple patterns can be passed through a file separated by newline\n"
+    "Example: ./bin/pmt -p patterns.txt hello.txt\n\n"
+    "Pattern selection and interpretation:\n"
+    " -e, --edit e_max                 maximum distance for approximated search\n"
+    " -p, --pattern pattern_file       search for patterns in pattern_file\n"
+    " -a, --algorithm algorithm_name   choose algorithm for pattern search\n"
+    "       exact search       :       kmp or shift_or\n"
+    "       approximated search:       sellers or ukkonen",
+    " -c, --count                      print the total occurrences of pattern matches"
     "Missing arguments",
     "File not found",
     "Unknown option"
