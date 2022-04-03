@@ -5,7 +5,12 @@
 #include <queue>
 #include "my_algorithms.h"
 
-UKKONEN::UKKONEN(const std::vector<std::string>& patterns, int edit_dist) : patterns(patterns), edit_dist(edit_dist){}
+UKKONEN::UKKONEN(const std::vector<std::string>& patterns, int edit_dist) : patterns(patterns), edit_dist(edit_dist){
+    int patterns_len = (int)patterns.size();
+    for(int i = 0; i < patterns_len; ++i){
+        fsms.emplace_back(build_fsm(i));
+    }
+}
 
 void UKKONEN::update_col(const int& id, std::vector<std::pair<int,int>>& col, const char& letter){
     const auto& pattern = patterns[id];
@@ -44,6 +49,7 @@ std::pair<std::vector<std::vector<int>>, std::unordered_map<int, int>> UKKONEN::
         }
         return hash;
     };
+    //printf("AAAA\n");
     std::unordered_map<std::vector<std::pair<int,int>>, int, decltype(hash)> all_states(10, hash);
     //std::map<std::vector<std::pair<int,int>>, int> all_states;
     int index_seq = 1;
@@ -58,8 +64,8 @@ std::pair<std::vector<std::vector<int>>, std::unordered_map<int, int>> UKKONEN::
         auto cur_col_index = col_queue.front().second;
         col_queue.pop();
         delta.push_back({});
-        for(int i = 0; i < alpha; ++i){
-            char letter = char(i);
+        for(char letter = ' '; char_id(letter) <= alpha + int(' '); ++letter){
+            printf("%c\n", letter);
             auto next_col = cur_col;
             auto next_index = -1;
             update_col(id, next_col, letter);
@@ -84,9 +90,8 @@ std::pair<std::vector<std::vector<int>>, std::unordered_map<int, int>> UKKONEN::
 void UKKONEN::match_pattern(const int id, const std::string& text, std::vector<std::pair<int,int>>& occurrences){
     int text_len = (int)text.size();
 
-    auto static fsm = build_fsm(id);
-    const auto& delta = fsm.first;  
-    auto& final_states = fsm.second;
+    const auto& delta = fsms[id].first;  
+    auto& final_states = fsms[id].second;
     
     int cur_index = 0;
     if(final_states.count(cur_index)){
@@ -94,8 +99,8 @@ void UKKONEN::match_pattern(const int id, const std::string& text, std::vector<s
     }
     for(int i = 0; i < text_len; ++i){
         cur_index = delta[cur_index][char_id(text[i])];
-        if(fsm.second.count(cur_index)){
-            auto len = fsm.second[cur_index];
+        if(final_states.count(cur_index)){
+            auto len = final_states[cur_index];
             occurrences.emplace_back(i - len + 1, len);
         }
     }
