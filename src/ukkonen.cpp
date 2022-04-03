@@ -65,7 +65,6 @@ std::pair<std::vector<std::vector<int>>, std::unordered_map<int, int>> UKKONEN::
         col_queue.pop();
         delta.push_back({});
         for(char letter = ' '; char_id(letter) <= alpha + int(' '); ++letter){
-            printf("%c\n", letter);
             auto next_col = cur_col;
             auto next_index = -1;
             update_col(id, next_col, letter);
