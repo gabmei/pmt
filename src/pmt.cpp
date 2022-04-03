@@ -59,7 +59,8 @@ enum Interruption_Types {
     HELP,
     MISSING_ARGUMENTS,
     NON_EXISTING_FILE,
-    UNKNOWN_ARGUMENT
+    UNKNOWN_ARGUMENT,
+    NEGATIVE_EDIT
 };
 
 string Interruption_Messages[] = {
@@ -72,12 +73,13 @@ string Interruption_Messages[] = {
     " -e, --edit e_max                 maximum distance for approximated search\n"
     " -p, --pattern pattern_file       search for patterns in pattern_file\n"
     " -a, --algorithm algorithm_name   choose algorithm for pattern search\n"
-    "       exact search       :       kmp or shift_or\n"
+    "       exact search       :       kmp, shift_or or bruteforce\n"
     "       approximated search:       sellers or ukkonen",
     " -c, --count                      print the total occurrences of pattern matches"
     "Missing arguments",
     "File not found",
-    "Unknown option"
+    "Unknown option",
+    "Negative edit_max"
 };
 
 void usage(Interruption_Types status){
@@ -87,9 +89,6 @@ void usage(Interruption_Types status){
 
 
 vector<pair<int,int>> get_occurrences(const vector<string>& patterns, const string& text, const vector<string>& algorithms, int alg_index, int edit_dist = 0){
-    if(alg_index == -1){
-        return bruteforce(patterns, text);
-    }
     if(algorithms[alg_index] == "shift_or"){
         static auto shift_or = SHIFT_OR(patterns);
         return shift_or.match_patterns(text);
@@ -112,10 +111,10 @@ vector<pair<int,int>> get_occurrences(const vector<string>& patterns, const stri
 int main(int argc, char **argv){
     int opt; 
     int edit_num = 0;
-    int alg_index = 0;
+    int alg_index = 1;
     bool count_flag = false;
     fstream patterns_file;
-    vector<string> algorithms = {"kmp", "shift_or", "sellers", "ukkonen"};
+    vector<string> algorithms = {"bruteforce", "kmp", "shift_or", "sellers", "ukkonen"};
     
     static struct option long_options[] = {
             {"edit", required_argument, 0, 'e'},
@@ -177,11 +176,11 @@ int main(int argc, char **argv){
             abort();
         }
     }
-    
+    if(edit_num < 0) usage(NEGATIVE_EDIT);
     vector<string> patterns;
     if(patterns_file.is_open()){
         string pattern;
-        while(patterns_file >> pattern){
+        while(getline(patterns_file, pattern)){
             patterns.emplace_back(pattern);
         }
         patterns_file.close();
@@ -193,8 +192,8 @@ int main(int argc, char **argv){
     sort(begin(patterns), end(patterns));
     patterns.erase(unique(begin(patterns),end(patterns)), end(patterns));
 
-    //if edit_num != 0 change default
-    if(alg_index < 2 && edit_num > 0){
+    //if edit_num != 0 change to sellers if needed
+    if(alg_index < 3 && edit_num > 0){
         alg_index = int(find(begin(algorithms), end(algorithms), "sellers") - begin(algorithms));
     }
 
