@@ -64,7 +64,7 @@ std::pair<std::vector<std::vector<int>>, std::unordered_map<int, int>> UKKONEN::
         auto cur_col_index = col_queue.front().second;
         col_queue.pop();
         delta.push_back({});
-        for(char letter = ' '; char_id(letter) <= alpha + int(' '); ++letter){
+        for(char letter = ' '; char_id(letter) < alpha; ++letter){
             auto next_col = cur_col;
             auto next_index = -1;
             update_col(id, next_col, letter);

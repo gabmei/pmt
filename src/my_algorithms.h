@@ -27,7 +27,7 @@ class SHIFT_OR{
         SHIFT_OR(const std::vector<std::string>& patterns);
         std::vector<std::pair<int,int>> match_patterns(const std::string& text);
     private:
-        static int char_id(char c) { return (unsigned char)c - (unsigned char)' '; }
+        static int char_id(char c) { return int(c) - int(' '); }
         static unsigned long long set_mask(int pattern_len) { return (1ull << pattern_len) - 1; }
         const static int alpha = 95;
 
@@ -70,7 +70,7 @@ class UKKONEN{
         UKKONEN(const std::vector<std::string>& patterns, int edit_dist);
         std::vector<std::pair<int,int>> match_patterns(const std::string& text);
     private:
-        static int char_id(char c) { return (unsigned char)c - (unsigned char)' '; }
+        static int char_id(char c) { return int(c) - int(' '); }
         static int phi(const char& a, const char& b) { return a != b ? 1 : 0; }
         void update_col(const int& id, std::vector<std::pair<int,int>>& col, const char& letter);
         void match_pattern(const int id, const std::string& text, std::vector<std::pair<int,int>>& occurrences);
